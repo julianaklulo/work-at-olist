@@ -22,7 +22,7 @@ def test_author_read(client):
     author_id = response.data["id"]
 
     response = client.get(reverse("authors-detail", kwargs={"pk": author_id}))
-    assert response.data["name"] == "Author 7"
+    assert response.data["name"] == "Author 73"
 
 
 def test_author_update(client):
