@@ -17,6 +17,35 @@ def test_author_create(client):
     assert len(Author.objects.all()) == 1
 
 
+def test_author_read(client):
+    response = client.post(reverse("authors-list"), {"name": "Author 73"})
+    author_id = response.data["id"]
+
+    response = client.get(reverse("authors-detail", kwargs={"pk": author_id}))
+    assert response.data["name"] == "Author 7"
+
+
+def test_author_update(client):
+    response = client.post(reverse("authors-list"), {"name": "Author 73"})
+    author_id = response.data["id"]
+
+    response = client.patch(reverse("authors-detail", kwargs={"pk": author_id}), {
+        "name": "Author 37"
+    }, content_type='application/json')
+
+    assert response.data["name"] == "Author 37"
+
+
+def test_author_delete(client):
+    response = client.post(reverse("authors-list"), {"name": "Author"})
+    author_id = response.data["id"]
+
+    response = client.delete(reverse("authors-detail", kwargs={"pk": author_id}))
+
+    assert response.status_code == 204
+    assert len(Author.objects.filter(id=author_id)) == 0
+
+
 def test_author_search(client):
     client.post(reverse("authors-list"), {"name": "Author 42"})
 
@@ -124,11 +153,11 @@ def test_book_search(client):
         "edition": "2",
         "authors": author_id
     })
-    
+
     response = client.get(reverse("books-list"), {"name": "2"})
     for book in response.data["results"]:
         assert "2" in book["name"]
-    
+
     response = client.get(reverse("books-list"), {"publication_year": 2020})
     for book in response.data["results"]:
         assert book["publication_year"] == 2020
